@@ -7,10 +7,31 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const cors = require('cors');
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-    credentials: true
-  }));
+  origin: function (origin, callback) {
+    // Allow requests with no origin
+    if (!origin) return callback(null, true);
+    
+    // Allow all vercel.app subdomains for your frontend
+    if (
+      origin.includes('bookit-frontend') && 
+      origin.includes('vercel.app')
+    ) {
+      return callback(null, true);
+    }
+    
+    // Allow localhost
+    if (origin.startsWith('http://localhost')) {
+      return callback(null, true);
+    }
+    
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true
+}));
+
 
 // Verify database connection on startup
 try {
